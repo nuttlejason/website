@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#1d1e1e">
+  <meta name="description" content="A deck of tangram puzzles. Move and rotate seven pieces to match each silhouette.">
+  <title>Tangram · NUTTLE, JASON</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/tangram.css">
+</head>
+<body>
+  <header><a class="identity" href="/">NUTTLE, JASON</a><a class="home-link" href="/">Home</a></header>
+  <main class="game-main">
+    <div class="game-heading"><h1>Tangram</h1><button id="help" type="button">How to play</button></div>
+    <section class="deck" aria-label="Tangram puzzle cards">
+      <div class="pile"><div class="pile-label"><span>DRAW</span><span id="deck-count"></span></div><div class="card-position draw-stack"><button id="draw-card" class="puzzle-card" type="button" aria-label="Reveal the solution and draw the next puzzle"></button></div></div>
+      <div class="pile"><div class="pile-label"><span>DISCARD</span><span id="discard-count">0</span></div><div id="discard-slot" class="card-position"><button id="discard-card" class="puzzle-card empty-card" type="button" aria-label="Discard pile is empty" disabled><span>Solutions land here</span></button></div></div>
+    </section>
+    <p class="deck-hint">Tap draw to reveal. Tap discard to return a puzzle.</p>
+    <section class="workspace" aria-label="Tangram play area">
+      <div class="board-toolbar"><span id="piece-label">Seven pieces</span><div><button id="flip-piece" type="button" disabled>Flip piece</button><button id="reset-pieces" type="button">Reset pieces</button></div></div>
+      <svg id="play-board" viewBox="0 0 720 440" role="group" aria-label="Movable tangram pieces" aria-describedby="board-instructions"></svg>
+      <p id="board-instructions" class="board-hint">Drag the middle to move · Corners rotate in 45° steps</p>
+      <p id="game-status" class="visually-hidden" role="status" aria-live="polite"></p>
+    </section>
+    <noscript><p>Enable JavaScript to move the pieces and use the puzzle deck.</p></noscript>
+  </main>
+  <dialog id="movement-tutorial" aria-labelledby="tutorial-title" aria-describedby="tutorial-intro">
+    <h2 id="tutorial-title">Make your move.</h2>
+    <p id="tutorial-intro">Use all seven pieces to match the silhouette on the top card.</p>
+    <div class="tutorial-moves">
+      <div><svg viewBox="0 0 130 94" aria-hidden="true"><g class="demo-move"><polygon points="28,72 28,16 84,72"/><circle cx="44" cy="56" r="7"/></g><path d="M82 44h28m-9-8 9 8-9 8"/></svg><h3>Move</h3><p>Drag from the middle of a piece.</p></div>
+      <div><svg viewBox="0 0 130 94" aria-hidden="true"><g class="demo-rotate"><polygon points="36,72 36,16 92,72"/><circle cx="92" cy="72" r="7"/></g><path d="M100 18c19 9 19 29 7 41m-1-13 1 13 13-2"/></svg><h3>Rotate</h3><p>Drag a corner around the center.</p></div>
+    </div>
+    <p class="tutorial-note">Rotation snaps in 45° steps. Select the parallelogram, then use <strong>Flip piece</strong> to mirror it. Tap draw to reveal a solution, or tap discard to put that puzzle back.</p>
+    <details><summary>Keyboard controls</summary><p>Tab to a piece. Arrow keys move it, Q and E rotate it, and F flips the parallelogram. Hold Shift with an arrow key for a larger move.</p></details>
+    <button id="close-tutorial" class="start-playing" type="button" autofocus>Let’s play</button>
+  </dialog>
+  <script src="/tangram-shapes.js"></script>
+  <script src="/tangram.js"></script>
+</body>
+</html>

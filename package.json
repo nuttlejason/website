@@ -1,0 +1,11 @@
+{
+  "name": "jason-nuttle-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-projects.mjs",
+    "check": "node scripts/check-site.mjs",
+    "export:github": "node scripts/export-github.mjs"
+  },
+  "engines": { "node": ">=22" }
+}
