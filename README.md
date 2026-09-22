@@ -1,50 +1,82 @@
-# Jason Nuttle
+# Jason Nuttle — Portfolio Website
 
-Static tangram website. The homepage lives in `dist/`.
+This repository contains the source for Jason Nuttle's personal portfolio website: a lightweight, static site built around an interactive tangram interface.
 
-Build content with `npm run build`, then validate with `npm run check`.
-See `MIGRATION.md` for the prepared GitHub/Vercel handoff and remaining launch tasks.
+The site presents projects spanning art, engineering, fabrication, electronics, and interactive work. Instead of a conventional navigation menu, the homepage assembles seven tangram pieces into different figures. Individual pieces act as links to Projects, About, Tangram, Instagram, and 3D Models.
+
+A separate Tangram page turns the same visual system into a playable puzzle deck, and project pages are generated from Markdown so new work can be added without editing page templates by hand.
+
+The site is built with plain HTML, CSS, SVG, JavaScript, and Node.js build scripts. It has no runtime framework, database, API, or external JavaScript dependencies.
+
+## Project structure
+
+- `content/about.md` — source content for the About page
+- `content/projects/` — Markdown files for individual projects
+- `dist/` — complete static website and media
+- `scripts/build-projects.mjs` — generates About and project pages
+- `scripts/check-site.mjs` — validates routes, assets, JavaScript, and project output
+- `dist/tangram-shapes.js` — shared tangram geometry
+- `dist/app.js` — homepage tangram navigation
+- `dist/tangram.js` — playable tangram interface
+
+## Building and checking the site
+
+Node.js 22 or later is recommended.
+
+```bash
+npm run build
+npm run check
+```
+
+`npm run build` regenerates the About and project pages from the Markdown source.
+
+`npm run check` verifies the generated pages, JavaScript syntax, local links, media references, and project metadata.
+
+The finished website is served directly from `dist/`.
+
+## Homepage tangram
+
+The homepage uses seven SVG tangram pieces as the primary navigation interface. On each assembly, the pieces form one of several silhouettes and animate into position.
+
+Labels are positioned and scaled dynamically to stay within each piece. The layout responds to screen size and respects the user's reduced-motion preference.
 
 ## Tangram puzzles
 
-The homepage Tangram tile opens `/tangram/`. The puzzle deck uses 17 of the 18
-designs in `dist/tangram-shapes.js`, excluding Ship because its sail needs a
-15-degree rotation. The homepage collection is unchanged. Card fronts use a
-single consistent-winding union fill, without insets or strokes, to hide the
-internal piece boundaries. Small reference offsets at the dolphin tail and
-bunny ear are closed by rigid translation in both the puzzle and solution.
-Goat (36), Shrimp (83), Teapot (261), Polar Bear (37), and Giraffe (38) are
-reconstructed from the supplied book photographs and appear on both pages.
-Each deck is
-shuffled without repeats. Press a card to flip it into the discard pile with
-its solution visible; the next silhouette appears on the draw pile. Shuffle
-again when the deck is empty. Tap the top discard to flip it back onto the draw
-pile, revealing the previous discard underneath. Cards have a 5:7 playing-card
-aspect ratio. Changing cards leaves the movable pieces alone.
+The Tangram page at `/tangram/` turns the same seven-piece system into an interactive puzzle.
 
-`dist/tangram.js` implements pointer-based movement and corner rotation with
-one uniform scale for all seven pieces. Rotation snaps to 45-degree increments
-throughout the drag and on release. Select the parallelogram to mirror it with Flip piece.
-Keyboard users can Tab to a piece, move with arrows, rotate with Q/E, and flip
-with F. The movement tutorial opens on each page load and from How to play.
-Reset pieces restores the starting arrangement without changing the cards.
-All game geometry and behavior are local SVG/CSS/JavaScript, with no added
-dependencies, images, or network services. The game script loads only here.
+Players can:
 
-## Editing About
+- drag pieces to move them
+- rotate pieces in 45-degree increments
+- flip the parallelogram
+- cycle through a shuffled deck of silhouettes
+- reveal solutions by moving cards to the discard pile
+- reset the pieces without changing the current puzzle
+- use keyboard controls instead of pointer input
 
-Edit `content/about.md` to update the standalone `/about/` page. Its first
-level-one heading supplies the page title. It supports the same Markdown as
-projects. Run `node scripts/build-projects.mjs` to rebuild both About and projects
-before publishing. The homepage About tile navigates directly to this page.
-The decorative dance below the text cycles through all existing tangram forms,
-holding each assembly before moving seven rigid SVG pieces to the next. It pauses
-offscreen or in a background tab, respects reduced motion, and has a pause button.
+The puzzle geometry and interaction are implemented entirely with local SVG, CSS, and JavaScript.
 
-## Editing projects
+## Editing the About page
 
-Each file in `content/projects/` creates a project tile and a separate page.
-The filename becomes its URL, so retain filenames when changing titles.
+Edit:
+
+```
+content/about.md
+```
+
+The first level-one heading becomes the page title. After editing, rebuild the site with:
+
+```bash
+npm run build
+```
+
+The About page also includes an animated tangram that cycles through the site's different silhouettes.
+
+## Adding or editing projects
+
+Each Markdown file in `content/projects/` produces one project tile and one project page. The filename becomes the project's URL slug.
+
+Example:
 
 ```markdown
 ---
@@ -59,28 +91,53 @@ Project introduction.
 
 Text with **bold**, *italic*, `code`, and [links](https://example.com).
 
-![Image description](/images/example.jpg)
+![Image description](/media/projects/example.jpg)
 ```
 
-Tags may be Engineering, Art, Code, Fabrication, Interactive, or Experiment.
-Use a comma-separated list for multiple types. Filters sit above the project
-column; project detail pages show linked tags. Filtering repacks the tiles,
-preserves date order, and supports shareable `?type=Art` URLs and browser Back.
+Supported project tags are:
 
-Dates sort automatically, newest first. Dates may be YYYY, YYYY-MM, or YYYY-MM-DD;
-leave `date:` empty for undated work, which sorts last. Optional `date_label:`
-preserves the published wording, including ongoing work. Empty bodies show a
-coming-soon message. The 13 projects were imported from nuttlejason.com/portfolio;
-each Markdown file records its original page in `source:`. Dream Car was undated
-on the source website. The sample projects have been removed.
-Supported Markdown: headings, paragraphs, bold, italic, code, fenced code,
-lists, blockquotes, links, and images. Raw HTML is escaped.
-Place image assets under `dist/images/`; images load lazily.
-Imported media lives under `dist/media/projects/`. A standalone Markdown link
-to an MP4, such as `[Watch the project](/media/projects/example.mp4)`, renders a
-native video player with controls, inline playback, and no video preloading.
-A JPG beside an MP4 with the same filename becomes its preview poster.
+- Engineering
+- Art
+- Code
+- Fabrication
+- Interactive
+- Experiment
 
-After editing or adding Markdown files, run `node scripts/build-projects.mjs`
-and publish the updated `dist/` directory. No browser Markdown dependency
-or runtime API is needed. Rebuild before publishing every content change.
+Projects are sorted automatically by date, newest first. Dates may use `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. An empty date places a project at the end of the list.
+
+Project filters on the site support shareable URLs such as:
+
+```
+/projects/?type=Art
+```
+
+## Project media
+
+Project media is stored under:
+
+```
+dist/media/projects/
+```
+
+Images load lazily.
+
+A standalone Markdown link to an MP4 renders as a native video player:
+
+```markdown
+[Watch the project](/media/projects/example.mp4)
+```
+
+If a JPG with the same filename exists beside the MP4, it is used as the video's poster image.
+
+## Technology
+
+The site intentionally keeps its technical stack small:
+
+- HTML
+- CSS
+- JavaScript
+- SVG
+- Node.js build scripts
+- Markdown content
+
+There are no browser-side package dependencies, runtime APIs, or external application services required to serve the site.
