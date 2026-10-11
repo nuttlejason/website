@@ -1,5 +1,6 @@
 ---
 tags: Art, Engineering, Experiment
+featured: true
 title: Dream Car
 date:
 date_label: Undated

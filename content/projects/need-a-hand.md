@@ -1,5 +1,6 @@
 ---
 tags: Art, Engineering, Fabrication
+featured: true
 title: Need a Hand?
 date: 2023-03
 date_label: March 2023

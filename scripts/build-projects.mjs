@@ -47,40 +47,38 @@ for(const file of (await readdir(path.join(root,'content/projects'))).filter(f=>
   if(!meta.title||(meta.date&&(!/^\d{4}(?:-\d{2}){0,2}$/.test(meta.date)||!Number.isFinite(Date.parse(meta.date)))))throw Error(`Invalid metadata: ${file}`);
   const tags=[...new Set((meta.tags||'').split(',').map(tag=>tag.trim()).filter(Boolean))];
   if(tags.some(tag=>!categories.includes(tag)))throw Error(`Unknown project tag: ${file}`);
-  projects.push({...meta,tags,slug:file.slice(0,-3),body:match[2]});
+  if(meta.featured&&!['true','false'].includes(meta.featured))throw Error('Invalid featured flag: '+file);
+  projects.push({...meta,tags,featured:meta.featured==='true',slug:file.slice(0,-3),body:match[2]});
 }
 projects.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||Number(a.source_order||0)-Number(b.source_order||0)||a.slug.localeCompare(b.slug));
 function page(title,body,script=''){
   return `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#1d1e1e"><title>${escape(title)} · NUTTLE, JASON</title><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/projects.css"></head><body><header><a class="identity" href="/">NUTTLE, JASON</a></header>${body}${script}</body></html>\n`;
 }
-let tiles='';
-// Each five-project band exactly tessellates an 800 x 200 rectangle.
-// Its two 400-wide modules stack on phones without changing reading order.
-const band=[
-  {p:[[0,0],[200,0],[200,200],[0,200]],x:16,y:34},
-  {p:[[200,0],[400,0],[400,200],[200,200]],x:216,y:34},
-  {p:[[0,0],[200,0],[0,200]],x:16,y:34},
-  {p:[[200,0],[400,0],[200,200],[0,200]],x:200,y:94,angle:-45,anchor:'middle'},
-  {p:[[400,0],[400,200],[200,200]],x:384,y:150,anchor:'end'}
+// One rigid tangram tile per project, matching the approved photo-list study.
+const tilePoints=[
+  '10,10 90,10 10,90','50,10 90,50 50,90 10,50',
+  '10,30 50,30 90,70 50,70','10,90 90,90 90,10',
+  '20,20 80,20 80,80 20,80','10,50 50,10 90,50',
+  '40,10 80,50 80,90 40,50'
 ];
-function inset(points,distance=2){
-  const normals=points.map((p,i)=>{const q=points[(i+1)%points.length],dx=q[0]-p[0],dy=q[1]-p[1],len=Math.hypot(dx,dy);return [-dy/len,dx/len];});
-  return points.map((p,i)=>{const a=normals[(i+points.length-1)%points.length],b=normals[i],f=distance/(1+a[0]*b[0]+a[1]*b[1]);return [p[0]+f*(a[0]+b[0]),p[1]+f*(a[1]+b[1])];});
+function thumbnail(project){
+  // An explicit thumbnail overrides the first photograph or video poster.
+  const firstImage=project.body.match(/!\[[^\]]*\]\(([^\s)]+)\)/)?.[1];
+  const firstVideo=project.body.match(/\[[^\]]*\]\(([^\s)]+\.mp4)\)/)?.[1];
+  const image=project.thumbnail||firstImage||firstVideo?.replace(/\.mp4$/,'.jpg');
+  if(!image)return '';
+  if(image.startsWith('/')&&!existsSync(path.join(root,'dist',image)))throw Error('Missing project thumbnail: '+project.slug);
+  return '<img class="project-thumb" src="'+safeURL(image)+'" alt="" width="480" height="480" loading="lazy" decoding="async">';
 }
-projects.forEach((project,i)=>{
-  const kind=i%5,{p,x,y,angle=0,anchor='start'}=band[kind];
-  if(kind===0||kind===2)tiles+='<svg class="project-pair" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" aria-label="Projects">';
-  const points=inset(p).map(p=>p.join(',')).join(' ');
+const rows=projects.map((project,i)=>{
   const title=escape(project.title),year=project.date?project.date.slice(0,4):'Undated';
-  // Conservative no-JavaScript fallback; the browser refines this using
-  // actual glyph measurements. Font size preserves the letters' proportions.
-  const fitted=` class="project-name" style="font-size:${Math.min(20,125/(project.title.length*1.03)).toFixed(3)}px"`;
-  tiles+=`<a class="project-tile" data-tags="${escape(project.tags.join(','))}" href="/projects/${project.slug}/" aria-label="${title}, ${year}, ${escape(project.tags.join(', '))}"><title>${title} · ${escape(project.tags.join(' · '))}</title><polygon points="${points}"/><g transform="rotate(${angle} ${x} ${y})"><text x="${x}" y="${y}" text-anchor="${anchor}"${fitted}>${title}</text><text class="project-year" x="${x}" y="${y+26}" text-anchor="${anchor}">${year}</text></g></a>`;
-  if(kind===1||kind===4||i===projects.length-1)tiles+='</svg>';
-});
+  return '<a class="project-row" data-tags="'+escape(project.tags.join(','))+'" data-featured="'+project.featured+'" href="/projects/'+project.slug+'/" aria-label="'+title+', '+year+'"><span class="project-number" aria-hidden="true">'+String(i+1).padStart(2,'0')+'</span><svg class="project-symbol" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon points="'+tilePoints[i%tilePoints.length]+'"/></svg><span class="project-summary"><span class="project-year">'+year+'</span><span class="project-name">'+title+'</span><span class="project-types">'+escape(project.tags.slice(0,3).join(' / '))+'</span></span>'+thumbnail(project)+'</a>';
+}).join('');
 await mkdir(path.join(root,'dist/projects'),{recursive:true});
-const filters=['All',...categories].map(tag=>`<button type="button" data-filter="${tag}" aria-pressed="${tag==='All'}">${tag}</button>`).join('');
-await writeFile(path.join(root,'dist/projects/index.html'),page('Projects',`<main class="projects-main"><h1 class="projects-heading">PROJECTS</h1><nav class="project-filters" aria-label="Filter projects by type" hidden>${filters}</nav><p id="filter-status" class="filter-status" role="status" aria-live="polite"></p><div class="project-column">${tiles}</div></main>`,'<script src="/projects.js"></script>'));
+const filters=['Featured','All','Art','Engineering','Code','Fabrication','Interactive','Experiment'].map(tag=>'<button type="button" data-filter="'+tag+'" aria-pressed="'+(tag==='All')+'">'+(tag==='All'?'All work':tag)+'</button>').join('');
+const years=projects.filter(project=>project.date).map(project=>project.date.slice(0,4));
+const range=years.length?years.at(-1)+'—'+years[0]:'';
+await writeFile(path.join(root,'dist/projects/index.html'),page('Projects','<main class="projects-main"><div class="projects-title-line"><h1 class="projects-heading">Projects<span class="project-count">('+projects.length+')</span></h1><span class="project-range">'+range+'</span></div><div class="projects-tools"><nav class="project-filters" aria-label="Filter projects by type" hidden>'+filters+'</nav><p id="filter-status" class="filter-status" role="status" aria-live="polite">'+projects.length+' projects</p></div><div class="project-list">'+rows+'</div></main>','<script src="/projects.js"></script>'));
 for(const project of projects){
   const dir=path.join(root,'dist/projects',project.slug);await mkdir(dir,{recursive:true});
   const body=project.body.trim()?markdown(project.body):'<p class="empty-project">Project details coming soon.</p>';

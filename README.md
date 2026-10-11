@@ -74,7 +74,7 @@ The About page also includes an animated tangram that cycles through the site's 
 
 ## Adding or editing projects
 
-Each Markdown file in `content/projects/` produces one project tile and one project page. The filename becomes the project's URL slug.
+Each Markdown file in `content/projects/` produces one photo-list row and one project page. Rows have a single tangram tile, a title, and a square photograph on the right. The filename becomes the project's URL slug.
 
 Example:
 
@@ -83,6 +83,7 @@ Example:
 title: Project name
 date: 2026-07-15
 tags: Art, Engineering
+featured: false
 ---
 
 Project introduction.
@@ -105,10 +106,15 @@ Supported project tags are:
 
 Projects are sorted automatically by date, newest first. Dates may use `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`. An empty date places a project at the end of the list.
 
+Set `featured: true` in a project's metadata to include it in the Featured tab. The temporary selections are Need a Hand?, BMB, and Dream Car.
+
+The list uses the first image in the project body, or the JPG poster for its first MP4. To choose a different image, add `thumbnail: /media/projects/example.jpg` to the metadata. Original media and the project detail pages remain uncropped.
+
 Project filters on the site support shareable URLs such as:
 
 ```
 /projects/?type=Art
+/projects/?type=Featured
 ```
 
 ## Project media

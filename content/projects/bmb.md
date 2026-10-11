@@ -1,5 +1,6 @@
 ---
 tags: Art, Fabrication
+featured: true
 title: BMB
 date: 2020-10
 date_label: October 2020
